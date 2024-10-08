@@ -10,7 +10,7 @@ exports.getAllCates = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
+///sada
 
 
 // Hàm xử lý việc thêm danh mục với hình ảnh
