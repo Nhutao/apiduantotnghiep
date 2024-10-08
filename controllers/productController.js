@@ -14,6 +14,45 @@ exports.getAllProducts = async (req, res) => {
   }
 };
 
+// Lấy danh mục theo giới tính
+exports.getCatesByGender = async (req, res) => {
+  try {
+    const gioitinh = req.query.gioitinh;
+    console.log(gioitinh);
+
+    const cates = await Product.findAll({
+      where: { gioi_tinh: gioitinh },
+    });
+    res.json(cates);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Lấy danh mục theo giới tính "Nữ"
+// exports.getCatesByGender = async (req, res) => {
+//   try {
+//     const cates = await Products.findAll({
+//       where: { gioi_tinh: "Nữ" }, // Ensure the value matches the ENUM casing
+//     });
+//     res.json(cates);
+//   } catch (error) {
+//     res.status(500).json({ error: error.message });
+//   }
+// };
+
+// Lấy danh mục theo "Đôi"
+exports.getCatesByCouple = async (req, res) => {
+  try {
+    const cates = await Product.findAll({
+      where: { gioi_tinh: "Đồng Hồ Đôi" },
+    });
+    res.json(cates);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 //show sản phẩm theo danh mục show lun thông tin danh mục sản phẩm
 exports.getProductsByCate = async (req, res) => {
   try {
@@ -22,6 +61,31 @@ exports.getProductsByCate = async (req, res) => {
     });
     const cate = await Category.findOne({ where: { _id: req.params.id } });
     res.json({ products, cate });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+//Lọc sản phẩm mới theo danh mục
+exports.getNewProductsByCategory = async (req, res) => {
+  try {
+    // Tìm danh mục "Đồng hồ Nam"
+    const cate = req.query.cate;
+    const category = await Category.findOne({
+      where: { danh_muc: cate },
+    });
+    console.log(category.dataValues._id);
+
+    if (!category) {
+      return res.status(404).json({ error: "Danh mục không tồn tại" });
+    }
+    // Lấy các sản phẩm mới nhất (sắp xếp theo ngày tạo) theo category_id
+    const products = await Product.findAll({
+      where: { id_danh_muc: category.dataValues._id },
+      order: [["_id", "DESC"]], // Sắp xếp sản phẩm mới nhất
+      limit: 10, // Giới hạn lấy 10 sản phẩm mới nhất (có thể thay đổi)
+    });
+
+    res.json(products);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -196,7 +260,7 @@ exports.getProductsByPage = async (req, res) => {
     }
     res.json(products);
   } catch (error) {
-    console.error('Error fetching products:', error.message);
+    console.error("Error fetching products:", error.message);
     res.status(500).json({ error: error.message });
   }
 };
